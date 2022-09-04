@@ -23,27 +23,29 @@ class NewsListViewModel @Inject constructor(
     private var isInitialized = false
 
     fun fetchNews() {
-        viewModelScope.launch {
-            responseStatus.postValue(ResponseStatus.Loading())
-            try {
-                val response = repository.fetchMostPopularNews()
-                if (response.isSuccessful) {
-                    isInitialized = true
-                    responseStatus.postValue(ResponseStatus.Success())
-                } else {
-                    responseStatus.postValue(
-                        ResponseStatus.Error(response.errorBody().toString())
-                    )
-                }
-            } catch (t: Throwable) {
-                Log.e("MostPopularViewModel", "Fetching Api Response", t)
-                when (t) {
-                    is IOException -> responseStatus.postValue(
-                        ResponseStatus.Error("Network Failure")
-                    )
-                    else -> responseStatus.postValue(
-                        ResponseStatus.Error("Conversion Error")
-                    )
+        if (!isInitialized) {
+            viewModelScope.launch {
+                responseStatus.postValue(ResponseStatus.Loading())
+                try {
+                    val response = repository.fetchMostPopularNews()
+                    if (response.isSuccessful) {
+                        isInitialized = true
+                        responseStatus.postValue(ResponseStatus.Success())
+                    } else {
+                        responseStatus.postValue(
+                            ResponseStatus.Error(response.errorBody().toString())
+                        )
+                    }
+                } catch (t: Throwable) {
+                    Log.e("MostPopularViewModel", "Fetching Api Response", t)
+                    when (t) {
+                        is IOException -> responseStatus.postValue(
+                            ResponseStatus.Error("Network Failure")
+                        )
+                        else -> responseStatus.postValue(
+                            ResponseStatus.Error("Conversion Error")
+                        )
+                    }
                 }
             }
         }
